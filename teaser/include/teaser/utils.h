@@ -118,15 +118,15 @@ template <class T, int D> float calculateDiameter(const Eigen::Matrix<T, D, Eige
  * @param Y
  * @return a rotation matrix R
  */
-inline Eigen::Matrix3d svdRot(const Eigen::Matrix<double, 3, Eigen::Dynamic>& X,
-                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& Y,
-                              const Eigen::Matrix<double, 1, Eigen::Dynamic>& W) {
+inline Eigen::Matrix3f svdRot(const Eigen::Matrix<float, 3, Eigen::Dynamic>& X,
+                              const Eigen::Matrix<float, 3, Eigen::Dynamic>& Y,
+                              const Eigen::Matrix<float, 1, Eigen::Dynamic>& W) {
   // Assemble the correlation matrix H = X * Y'
-  Eigen::Matrix3d H = X * W.asDiagonal() * Y.transpose();
+  Eigen::Matrix3f H = X * W.asDiagonal() * Y.transpose();
 
-  Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
-  Eigen::Matrix3d U = svd.matrixU();
-  Eigen::Matrix3d V = svd.matrixV();
+  Eigen::JacobiSVD<Eigen::Matrix3f> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
+  Eigen::Matrix3f U = svd.matrixU();
+  Eigen::Matrix3f V = svd.matrixV();
 
   if (U.determinant() * V.determinant() < 0) {
     V.col(2) *= -1;

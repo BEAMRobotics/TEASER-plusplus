@@ -66,7 +66,7 @@ vector<int> teaser::MaxCliqueSolver::findMaxClique(teaser::Graph graph) {
   if (params_.solver_mode == CLIQUE_SOLVER_MODE::KCORE_HEU &&
       params_.kcore_heuristic_threshold != 1 &&
       max_core > static_cast<int>(params_.kcore_heuristic_threshold *
-                                  static_cast<double>(all_vertices.size()))) {
+                                  static_cast<float>(all_vertices.size()))) {
     TEASER_DEBUG_INFO_MSG("Using K-core heuristic finder.");
     // remove all nodes with core number less than max core number
     // k_cores is a vector saving the core number of each vertex

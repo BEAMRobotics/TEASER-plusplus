@@ -89,7 +89,7 @@ inline Eigen::Matrix<T, R, C> readFileToEigenFixedMatrix(std::istream& objectFil
   return object_in;
 }
 
-inline double getAngularError(Eigen::Matrix3d R_exp, Eigen::Matrix3d R_est) {
+inline float getAngularError(Eigen::Matrix3f R_exp, Eigen::Matrix3f R_est) {
   return std::abs(std::acos(fmin(fmax(((R_exp.transpose() * R_est).trace() - 1) / 2, -1.0), 1.0)));
 }
 

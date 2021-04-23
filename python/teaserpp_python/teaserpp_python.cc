@@ -49,8 +49,8 @@ PYBIND11_MODULE(teaserpp_python, m) {
       .def(py::init<const teaser::RobustRegistrationSolver::Params&>())
       .def("getParams", &teaser::RobustRegistrationSolver::getParams)
       .def("reset", &teaser::RobustRegistrationSolver::reset)
-      .def("solve", py::overload_cast<const Eigen::Matrix<double, 3, Eigen::Dynamic>&,
-                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>&>(
+      .def("solve", py::overload_cast<const Eigen::Matrix<float, 3, Eigen::Dynamic>&,
+                                      const Eigen::Matrix<float, 3, Eigen::Dynamic>&>(
                         &teaser::RobustRegistrationSolver::solve))
       .def("getSolution", &teaser::RobustRegistrationSolver::getSolution)
       .def("getGNCRotationCostAtTermination",
@@ -179,15 +179,15 @@ PYBIND11_MODULE(teaserpp_python, m) {
   certifier.def(py::init<const teaser::DRSCertifier::Params>())
       .def(
           "certify",
-          py::overload_cast<const Eigen::Matrix3d&, const Eigen::Matrix<double, 3, Eigen::Dynamic>&,
-                            const Eigen::Matrix<double, 3, Eigen::Dynamic>&,
+          py::overload_cast<const Eigen::Matrix3f&, const Eigen::Matrix<float, 3, Eigen::Dynamic>&,
+                            const Eigen::Matrix<float, 3, Eigen::Dynamic>&,
                             const Eigen::Matrix<bool, 1, Eigen::Dynamic>&>(
               &teaser::DRSCertifier::certify))
       .def(
           "certify",
-          py::overload_cast<const Eigen::Matrix3d&, const Eigen::Matrix<double, 3, Eigen::Dynamic>&,
-                            const Eigen::Matrix<double, 3, Eigen::Dynamic>&,
-                            const Eigen::Matrix<double, 1, Eigen::Dynamic>&>(
+          py::overload_cast<const Eigen::Matrix3f&, const Eigen::Matrix<float, 3, Eigen::Dynamic>&,
+                            const Eigen::Matrix<float, 3, Eigen::Dynamic>&,
+                            const Eigen::Matrix<float, 1, Eigen::Dynamic>&>(
               &teaser::DRSCertifier::certify));
 
   // Python bound for DRSCertifier::EIG_SOLVER_TYPE

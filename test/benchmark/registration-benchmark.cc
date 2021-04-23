@@ -34,17 +34,17 @@ protected:
    * Struct to represent all necessary data / reference values for a benchmark
    */
   struct BenchmarkData {
-    Eigen::Matrix<double, 3, Eigen::Dynamic> src;
-    Eigen::Matrix<double, 3, Eigen::Dynamic> dst;
-    double s_est;
-    double s_ref;
-    Eigen::Matrix3d R_est;
-    Eigen::Matrix3d R_ref;
-    Eigen::Vector3d t_est;
-    Eigen::Vector3d t_ref;
-    double noise_sigma;
-    double noise_bound;
-    double outlier_ratio;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> src;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> dst;
+    float s_est;
+    float s_ref;
+    Eigen::Matrix3f R_est;
+    Eigen::Matrix3f R_ref;
+    Eigen::Vector3f t_est;
+    Eigen::Vector3f t_ref;
+    float noise_sigma;
+    float noise_bound;
+    float outlier_ratio;
     int num_points;
   };
 
@@ -53,14 +53,14 @@ protected:
    */
   struct ErrorConditions {
     // acceptable errors from ground truths
-    double s_ground_truth_error;
-    double R_ground_truth_error;
-    double t_ground_truth_error;
+    float s_ground_truth_error;
+    float R_ground_truth_error;
+    float t_ground_truth_error;
 
     // acceptable errors from MATLAB TEASER implementation
-    double s_TEASER_error;
-    double R_TEASER_error;
-    double t_TEASER_error;
+    float s_TEASER_error;
+    float R_TEASER_error;
+    float t_TEASER_error;
   };
 
   /**
@@ -80,8 +80,8 @@ protected:
    * @param outlier_ratio
    * @param noise_bound
    */
-  void loadParameters(std::string file_path, int* num_points, double* noise_sigma,
-                      double* outlier_ratio, double* noise_bound) {
+  void loadParameters(std::string file_path, int* num_points, float* noise_sigma,
+                      float* outlier_ratio, float* noise_bound) {
     // Open the file
     std::ifstream file;
     file.open(file_path);
@@ -141,24 +141,24 @@ protected:
     teaser::PointCloud src_cloud;
     auto status = reader.read(src_file, src_cloud);
     EXPECT_EQ(status, 0);
-    benchmark_data.src = teaser::test::teaserPointCloudToEigenMatrix<double>(src_cloud);
+    benchmark_data.src = teaser::test::teaserPointCloudToEigenMatrix<float>(src_cloud);
 
     // Load dst model
     teaser::PointCloud dst_cloud;
     status = reader.read(dst_file, dst_cloud);
     EXPECT_EQ(status, 0);
-    benchmark_data.dst = teaser::test::teaserPointCloudToEigenMatrix<double>(dst_cloud);
+    benchmark_data.dst = teaser::test::teaserPointCloudToEigenMatrix<float>(dst_cloud);
 
     // Load parameters
-    double noise_bound, outlier_ratio, noise_sigma;
+    float noise_bound, outlier_ratio, noise_sigma;
     loadParameters(parameters_file, &(benchmark_data.num_points), &(benchmark_data.noise_sigma),
                    &(benchmark_data.outlier_ratio), &(benchmark_data.noise_bound));
 
     // Load reference values
-    benchmark_data.R_est = teaser::test::readFileToEigenFixedMatrix<double, 3, 3>(R_est_file);
-    benchmark_data.R_ref = teaser::test::readFileToEigenFixedMatrix<double, 3, 3>(R_ref_file);
-    benchmark_data.t_est = teaser::test::readFileToEigenFixedMatrix<double, 3, 1>(t_est_file);
-    benchmark_data.t_ref = teaser::test::readFileToEigenFixedMatrix<double, 3, 1>(t_ref_file);
+    benchmark_data.R_est = teaser::test::readFileToEigenFixedMatrix<float, 3, 3>(R_est_file);
+    benchmark_data.R_ref = teaser::test::readFileToEigenFixedMatrix<float, 3, 3>(R_ref_file);
+    benchmark_data.t_est = teaser::test::readFileToEigenFixedMatrix<float, 3, 1>(t_est_file);
+    benchmark_data.t_ref = teaser::test::readFileToEigenFixedMatrix<float, 3, 1>(t_ref_file);
     s_est_file >> benchmark_data.s_est;
     s_ref_file >> benchmark_data.s_ref;
 
@@ -173,9 +173,9 @@ protected:
                        std::string rotation_method = "GNC-TLS", size_t num_runs = 100) {
 
     // Variables for storing average errors
-    double s_err_ref_avg = 0, t_err_ref_avg = 0, R_err_ref_avg = 0, s_err_est_avg = 0,
+    float s_err_ref_avg = 0, t_err_ref_avg = 0, R_err_ref_avg = 0, s_err_est_avg = 0,
            t_err_est_avg = 0, R_err_est_avg = 0;
-    double duration_avg = 0;
+    float duration_avg = 0;
 
     for (size_t i = 0; i < num_runs; ++i) {
       // Start the timer
@@ -215,9 +215,9 @@ protected:
       auto actual_solution = solver.getSolution();
 
       // Errors wrt ground truths
-      double s_err_ref = std::abs(actual_solution.scale - data.s_ref);
-      double t_err_ref = (actual_solution.translation - data.t_ref).norm();
-      double R_err_ref = teaser::test::getAngularError(data.R_ref, actual_solution.rotation);
+      float s_err_ref = std::abs(actual_solution.scale - data.s_ref);
+      float t_err_ref = (actual_solution.translation - data.t_ref).norm();
+      float R_err_ref = teaser::test::getAngularError(data.R_ref, actual_solution.rotation);
       EXPECT_LE(s_err_ref, conditions.s_ground_truth_error);
       EXPECT_LE(t_err_ref, conditions.t_ground_truth_error);
       EXPECT_LE(R_err_ref, conditions.R_ground_truth_error);
@@ -226,9 +226,9 @@ protected:
       R_err_ref_avg += R_err_ref;
 
       // Errors wrt MATLAB implementation (TEASER w/ SDP rotation estimation) output
-      double s_err_est = std::abs(actual_solution.scale - data.s_est);
-      double t_err_est = (actual_solution.translation - data.t_est).norm();
-      double R_err_est = teaser::test::getAngularError(data.R_est, actual_solution.rotation);
+      float s_err_est = std::abs(actual_solution.scale - data.s_est);
+      float t_err_est = (actual_solution.translation - data.t_est).norm();
+      float R_err_est = teaser::test::getAngularError(data.R_est, actual_solution.rotation);
       EXPECT_LE(s_err_est, conditions.s_TEASER_error);
       EXPECT_LE(t_err_est, conditions.t_TEASER_error);
       EXPECT_LE(R_err_est, conditions.R_TEASER_error);
@@ -236,7 +236,7 @@ protected:
       t_err_est_avg += t_err_est;
       R_err_est_avg += R_err_est;
     }
-    double div_factor = 1.0 / static_cast<double>(num_runs);
+    float div_factor = 1.0 / static_cast<float>(num_runs);
     s_err_ref_avg *= div_factor;
     R_err_ref_avg *= div_factor;
     t_err_ref_avg *= div_factor;

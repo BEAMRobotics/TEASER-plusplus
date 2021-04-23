@@ -13,7 +13,7 @@
 #include "teaser/utils.h"
 
 teaser::FPFHCloudPtr teaser::FPFHEstimation::computeFPFHFeatures(
-    const teaser::PointCloud& input_cloud, double normal_search_radius, double fpfh_search_radius) {
+    const teaser::PointCloud& input_cloud, float normal_search_radius, float fpfh_search_radius) {
 
   // Intermediate variables
   pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
@@ -58,4 +58,4 @@ void teaser::FPFHEstimation::setSearchMethod(
 void teaser::FPFHEstimation::compute(pcl::PointCloud<pcl::FPFHSignature33>& output_cloud) {
   fpfh_estimation_->compute(output_cloud);
 }
-void teaser::FPFHEstimation::setRadiusSearch(double r) { fpfh_estimation_->setRadiusSearch(r); }
+void teaser::FPFHEstimation::setRadiusSearch(float r) { fpfh_estimation_->setRadiusSearch(r); }

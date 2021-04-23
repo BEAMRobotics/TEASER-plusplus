@@ -32,8 +32,8 @@ public:
    * @param normal_search_radius Radius for estimating normals
    * @param fpfh_search_radius Radius for calculating FPFH (needs to be at least normalSearchRadius)
    */
-  FPFHCloudPtr computeFPFHFeatures(const PointCloud& input_cloud, double normal_search_radius = 0.03,
-                                        double fpfh_search_radius = 0.05);
+  FPFHCloudPtr computeFPFHFeatures(const PointCloud& input_cloud, float normal_search_radius = 0.03,
+                                        float fpfh_search_radius = 0.05);
 
   /**
    * Return the pointer to the underlying pcl::FPFHEstimation object
@@ -74,7 +74,7 @@ private:
   /**
    * Wrapper function for the corresponding PCL function.
    */
-  void setRadiusSearch(double);
+  void setRadiusSearch(float);
 };
 
 } // namespace teaser

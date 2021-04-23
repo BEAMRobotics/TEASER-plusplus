@@ -14,12 +14,12 @@
 
 namespace teaser {
 
-using SparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, int64_t>;
+using SparseMatrix = Eigen::SparseMatrix<float, Eigen::ColMajor, int64_t>;
 
 struct CertificationResult {
   bool is_optimal = false;
-  double best_suboptimality = -1;
-  std::vector<double> suboptimality_traj;
+  float best_suboptimality = -1;
+  std::vector<float> suboptimality_traj;
 };
 
 /**
@@ -37,9 +37,9 @@ public:
    * @param theta [in] a binary vector indicating inliers vs. outliers
    * @return  relative sub-optimality gap
    */
-  virtual CertificationResult certify(const Eigen::Matrix3d& rotation_solution,
-                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
+  virtual CertificationResult certify(const Eigen::Matrix3f& rotation_solution,
+                                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
                                       const Eigen::Matrix<bool, 1, Eigen::Dynamic>& theta) = 0;
 };
 
@@ -71,29 +71,29 @@ public:
     /**
      * Noise bound for the vectors used for certification
      */
-    double noise_bound = 0.01;
+    float noise_bound = 0.01;
 
     /**
      * Square of the ratio between acceptable noise and noise bound. Usually set to 1.
      */
-    double cbar2 = 1;
+    float cbar2 = 1;
 
     /**
      * Suboptimality gap
      *
      * This is not a percentage. Multiply by 100 to get a percentage.
      */
-    double sub_optimality = 1e-3;
+    float sub_optimality = 1e-3;
 
     /**
      * Maximum iterations allowed
      */
-    double max_iterations = 2e2;
+    float max_iterations = 2e2;
 
     /**
      * Gamma value (refer to [1] for details)
      */
-    double gamma_tau = 1.999999;
+    float gamma_tau = 1.999999;
 
     /**
      * Solver for eigendecomposition / spectral decomposition
@@ -114,7 +114,7 @@ public:
    * @param noise_bound [in] bound on the noise
    * @param cbar2 [in] maximal allowed residual^2 to noise bound^2 ratio, usually set to 1
    */
-  DRSCertifier(double noise_bound, double cbar2) {
+  DRSCertifier(float noise_bound, float cbar2) {
     params_.noise_bound = noise_bound;
     params_.cbar2 = cbar2;
   };
@@ -128,9 +128,9 @@ public:
    * @param theta [in] binary (1 vs. 0) vector indicating inliers vs. outliers
    * @return  relative sub-optimality gap
    */
-  CertificationResult certify(const Eigen::Matrix3d& R_solution,
-                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
+  CertificationResult certify(const Eigen::Matrix3f& R_solution,
+                              const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                              const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
                               const Eigen::Matrix<bool, 1, Eigen::Dynamic>& theta) override;
 
   /**
@@ -142,10 +142,10 @@ public:
    * @param theta [in] binary (1 vs. -1) vector indicating inliers vs. outliers
    * @return  relative sub-optimality gap
    */
-  CertificationResult certify(const Eigen::Matrix3d& R_solution,
-                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
-                              const Eigen::Matrix<double, 1, Eigen::Dynamic>& theta);
+  CertificationResult certify(const Eigen::Matrix3f& R_solution,
+                              const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                              const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
+                              const Eigen::Matrix<float, 1, Eigen::Dynamic>& theta);
 
   /**
    * Compute sub-optimality gap
@@ -154,14 +154,14 @@ public:
    * @param N
    * @return
    */
-  double computeSubOptimalityGap(const Eigen::MatrixXd& M, double mu, int N);
+  float computeSubOptimalityGap(const Eigen::MatrixXf& M, float mu, int N);
 
   /**
    * Get the Omega_1 matrix given a quaternion
    * @param q an Eigen quaternion
    * @param omega1 4-by-4 omega_1 matrix
    */
-  Eigen::Matrix4d getOmega1(const Eigen::Quaterniond& q);
+  Eigen::Matrix4f getOmega1(const Eigen::Quaternionf& q);
 
   /**
    * Get a 4-by-4 block diagonal matrix with each block represents omega_1
@@ -169,17 +169,17 @@ public:
    * @param theta
    * @param D_omega
    */
-  void getBlockDiagOmega(int Npm, const Eigen::Quaterniond& q,
-                         Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>* D_omega);
+  void getBlockDiagOmega(int Npm, const Eigen::Quaternionf& q,
+                         Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>* D_omega);
 
   /**
    * Get Q cost matrix (see Proposition 10 in [1])
    * @param v1 vectors under rotation
    * @param v2 vectors after rotation
    */
-  void getQCost(const Eigen::Matrix<double, 3, Eigen::Dynamic>& v1,
-                const Eigen::Matrix<double, 3, Eigen::Dynamic>& v2,
-                Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>* Q);
+  void getQCost(const Eigen::Matrix<float, 3, Eigen::Dynamic>& v1,
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& v2,
+                Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>* Q);
 
   /**
    * Given an arbitrary matrix W, project W to the correct dual structure
@@ -188,9 +188,9 @@ public:
     (3) W_dual must also satisfy complementary slackness (because M_init satisfies complementary
    slackness) This projection is optimal in the sense of minimum Frobenious norm
    */
-  void getOptimalDualProjection(const Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>& W,
-                                const Eigen::Matrix<double, 1, Eigen::Dynamic>& theta_prepended,
-                                const SparseMatrix& A_inv, Eigen::MatrixXd* W_dual);
+  void getOptimalDualProjection(const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>& W,
+                                const Eigen::Matrix<float, 1, Eigen::Dynamic>& theta_prepended,
+                                const SparseMatrix& A_inv, Eigen::MatrixXf* W_dual);
 
   /**
    * Generate an initial guess (see Appendix U of [1]).
@@ -205,10 +205,10 @@ public:
    * @param dst [in]
    * @param lambda_guess [out]
    */
-  void getLambdaGuess(const Eigen::Matrix<double, 3, 3>& R,
-                      const Eigen::Matrix<double, 1, Eigen::Dynamic>& theta,
-                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
+  void getLambdaGuess(const Eigen::Matrix<float, 3, 3>& R,
+                      const Eigen::Matrix<float, 1, Eigen::Dynamic>& theta,
+                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
                       SparseMatrix* lambda_guess);
 
   /**
@@ -219,7 +219,7 @@ public:
    * prepended
    * @param A_inv [out] inverse of A
    */
-  void getLinearProjection(const Eigen::Matrix<double, 1, Eigen::Dynamic>& theta_prepended,
+  void getLinearProjection(const Eigen::Matrix<float, 1, Eigen::Dynamic>& theta_prepended,
                            SparseMatrix* A_inv);
 
 private:
@@ -230,9 +230,9 @@ private:
    * @param theta [in]
    * @param output [out]
    */
-  void getBlockRowSum(const Eigen::MatrixXd& A, const int& row,
-                      const Eigen::Matrix<double, 1, Eigen::Dynamic>& theta,
-                      Eigen::Vector4d* output);
+  void getBlockRowSum(const Eigen::MatrixXf& A, const int& row,
+                      const Eigen::Matrix<float, 1, Eigen::Dynamic>& theta,
+                      Eigen::Vector4f* output);
 
   Params params_;
 };

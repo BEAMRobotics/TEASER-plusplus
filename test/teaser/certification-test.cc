@@ -26,7 +26,7 @@
 /**
  * Acceptable numerical error threshold for all certification tests
  */
-const double ACCEPTABLE_ERROR = 1e-7;
+const float ACCEPTABLE_ERROR = 1e-7;
 
 /**
  * Test fixture for loading data case by case
@@ -40,27 +40,27 @@ protected:
    */
   struct Inputs {
     teaser::DRSCertifier::Params params;
-    Eigen::Matrix<double, 3, Eigen::Dynamic> v1;
-    Eigen::Matrix<double, 3, Eigen::Dynamic> v2;
-    Eigen::Matrix3d R_est;
-    Eigen::Quaternion<double> q_est;
-    Eigen::Matrix<double, 1, Eigen::Dynamic> theta_est;
-    Eigen::MatrixXd W;
-    Eigen::MatrixXd M_affine;
-    double mu;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> v1;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> v2;
+    Eigen::Matrix3f R_est;
+    Eigen::Quaternion<float> q_est;
+    Eigen::Matrix<float, 1, Eigen::Dynamic> theta_est;
+    Eigen::MatrixXf W;
+    Eigen::MatrixXf M_affine;
+    float mu;
   };
 
   /**
    * Expected outputs for methods under the DRSCertifier
    */
   struct ExpectedOutputs {
-    Eigen::Matrix4d omega;
-    Eigen::MatrixXd block_diag_omega;
-    Eigen::MatrixXd Q_cost;
-    Eigen::MatrixXd lambda_guess;
-    Eigen::MatrixXd A_inv;
-    Eigen::MatrixXd W_dual;
-    double suboptimality_1st_iter;
+    Eigen::Matrix4f omega;
+    Eigen::MatrixXf block_diag_omega;
+    Eigen::MatrixXf Q_cost;
+    Eigen::MatrixXf lambda_guess;
+    Eigen::MatrixXf A_inv;
+    Eigen::MatrixXf W_dual;
+    float suboptimality_1st_iter;
     teaser::CertificationResult certification_result;
   };
 
@@ -147,91 +147,91 @@ protected:
       // These are the TIMs
       std::ifstream v1_source_file(case_dir + "/v1.csv");
       data.inputs.v1 =
-          teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(v1_source_file);
+          teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(v1_source_file);
 
       // v2: 3-by-N matrix
       // These are the TIMs
       std::ifstream v2_source_file(case_dir + "/v2.csv");
       data.inputs.v2 =
-          teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(v2_source_file);
+          teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(v2_source_file);
 
       // q_est: estimated quaternion
       std::ifstream q_source_file(case_dir + "/q_est.csv");
-      auto q_mat = teaser::test::readFileToEigenFixedMatrix<double, 4, 1>(q_source_file);
-      Eigen::Quaternion<double> q(q_mat(3), q_mat(0), q_mat(1), q_mat(2));
+      auto q_mat = teaser::test::readFileToEigenFixedMatrix<float, 4, 1>(q_source_file);
+      Eigen::Quaternion<float> q(q_mat(3), q_mat(0), q_mat(1), q_mat(2));
       data.inputs.q_est = q;
 
       // R_est: estimated quaternion
       std::ifstream R_est_source_file(case_dir + "/R_est.csv");
-      data.inputs.R_est = teaser::test::readFileToEigenFixedMatrix<double, 3, 3>(R_est_source_file);
+      data.inputs.R_est = teaser::test::readFileToEigenFixedMatrix<float, 3, 3>(R_est_source_file);
 
       // theta_est: binary outlier vector
       std::ifstream theta_source_file(case_dir + "/theta_est.csv");
       data.inputs.theta_est =
-          teaser::test::readFileToEigenMatrix<double, 1, Eigen::Dynamic>(theta_source_file);
+          teaser::test::readFileToEigenMatrix<float, 1, Eigen::Dynamic>(theta_source_file);
 
       // W: inputs for optimal dual projection
       std::ifstream W_source_file(case_dir + "/W_1st_iter.csv");
-      data.inputs.W = teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+      data.inputs.W = teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
           W_source_file);
 
       // M_affine: for calculating suboptimality
       std::ifstream M_affine_source_file(case_dir + "/M_affine_1st_iter.csv");
       data.inputs.M_affine =
-          teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+          teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
               M_affine_source_file);
 
       // mu: for calculating suboptimality
       std::ifstream mu_source_file(case_dir + "/mu.csv");
-      data.inputs.mu = teaser::test::readFileToEigenFixedMatrix<double, 1, 1>(mu_source_file)(0);
+      data.inputs.mu = teaser::test::readFileToEigenFixedMatrix<float, 1, 1>(mu_source_file)(0);
 
       // Outputs:
       // omega: omega1 matrix
       std::ifstream omega_source_file(case_dir + "/omega.csv");
       data.expected_outputs.omega =
-          teaser::test::readFileToEigenFixedMatrix<double, 4, 4>(omega_source_file);
+          teaser::test::readFileToEigenFixedMatrix<float, 4, 4>(omega_source_file);
 
       // block_diag_omega: block diagonal omega matrix
       std::ifstream block_diag_omega_source_file(case_dir + "/block_diag_omega.csv");
       data.expected_outputs.block_diag_omega =
-          teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+          teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
               block_diag_omega_source_file);
 
       // Q_cost: Q_cost matrix
       std::ifstream q_cost_source_file(case_dir + "/Q_cost.csv");
       data.expected_outputs.Q_cost =
-          teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+          teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
               q_cost_source_file);
 
       // lambda guess: initial guess
       std::ifstream lambda_guess_source_file(case_dir + "/lambda_bar_init.csv");
       data.expected_outputs.lambda_guess =
-          teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+          teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
               lambda_guess_source_file);
 
       // A_inv: inverse map from getLinearProjection
       std::ifstream A_inv_source_file(case_dir + "/A_inv.csv");
       data.expected_outputs.A_inv =
-          teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+          teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
               A_inv_source_file);
 
       // W_dual: output from optimal dual projection
       std::ifstream W_dual_source_file(case_dir + "/W_dual_1st_iter.csv");
       data.expected_outputs.W_dual =
-          teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, Eigen::Dynamic>(
+          teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, Eigen::Dynamic>(
               W_dual_source_file);
 
       // suboptimality: calculated suboptimality after 1st iteration
       std::ifstream suboptimality_source_file(case_dir + "/suboptimality_1st_iter.csv");
       data.expected_outputs.suboptimality_1st_iter =
-          teaser::test::readFileToEigenFixedMatrix<double, 1, 1>(suboptimality_source_file)(0);
+          teaser::test::readFileToEigenFixedMatrix<float, 1, 1>(suboptimality_source_file)(0);
 
       // certification_result: a struct holding certification results. Specifically:
       // suboptimality_trajy: suboptimality gaps throughout all the iterations
       // best_suboptimality: smallest suboptimality gap
       std::ifstream suboptimality_traj_source_file(case_dir + "/suboptimality_traj.csv");
-      Eigen::RowVectorXd suboptimality_traj_mat =
-          teaser::test::readFileToEigenMatrix<double, 1, Eigen::Dynamic>(
+      Eigen::RowVectorXf suboptimality_traj_mat =
+          teaser::test::readFileToEigenMatrix<float, 1, Eigen::Dynamic>(
               suboptimality_traj_source_file);
       for (size_t i = 0; i < suboptimality_traj_mat.cols(); ++i) {
         data.expected_outputs.certification_result.suboptimality_traj.push_back(
@@ -266,40 +266,40 @@ protected:
       // These are the TIMs
       std::ifstream v1_source_file(case_dir + "/v1.csv");
       data.inputs.v1 =
-          teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(v1_source_file);
+          teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(v1_source_file);
 
       // v2: 3-by-N matrix
       // These are the TIMs
       std::ifstream v2_source_file(case_dir + "/v2.csv");
       data.inputs.v2 =
-          teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(v2_source_file);
+          teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(v2_source_file);
 
       // q_est: estimated quaternion
       std::ifstream q_source_file(case_dir + "/q_est.csv");
-      auto q_mat = teaser::test::readFileToEigenFixedMatrix<double, 4, 1>(q_source_file);
-      Eigen::Quaternion<double> q(q_mat(3), q_mat(0), q_mat(1), q_mat(2));
+      auto q_mat = teaser::test::readFileToEigenFixedMatrix<float, 4, 1>(q_source_file);
+      Eigen::Quaternion<float> q(q_mat(3), q_mat(0), q_mat(1), q_mat(2));
       data.inputs.q_est = q;
 
       // R_est: estimated quaternion
       std::ifstream R_est_source_file(case_dir + "/R_est.csv");
-      data.inputs.R_est = teaser::test::readFileToEigenFixedMatrix<double, 3, 3>(R_est_source_file);
+      data.inputs.R_est = teaser::test::readFileToEigenFixedMatrix<float, 3, 3>(R_est_source_file);
 
       // theta_est: binary outlier vector
       std::ifstream theta_source_file(case_dir + "/theta_est.csv");
       data.inputs.theta_est =
-          teaser::test::readFileToEigenMatrix<double, 1, Eigen::Dynamic>(theta_source_file);
+          teaser::test::readFileToEigenMatrix<float, 1, Eigen::Dynamic>(theta_source_file);
 
       // suboptimality: calculated suboptimality after 1st iteration
       std::ifstream suboptimality_source_file(case_dir + "/suboptimality_1st_iter.csv");
       data.expected_outputs.suboptimality_1st_iter =
-          teaser::test::readFileToEigenFixedMatrix<double, 1, 1>(suboptimality_source_file)(0);
+          teaser::test::readFileToEigenFixedMatrix<float, 1, 1>(suboptimality_source_file)(0);
 
       // certification_result: a struct holding certification results. Specifically:
       // suboptimality_trajy: suboptimality gaps throughout all the iterations
       // best_suboptimality: smallest suboptimality gap
       std::ifstream suboptimality_traj_source_file(case_dir + "/suboptimality_traj.csv");
-      Eigen::RowVectorXd suboptimality_traj_mat =
-          teaser::test::readFileToEigenMatrix<double, 1, Eigen::Dynamic>(
+      Eigen::RowVectorXf suboptimality_traj_mat =
+          teaser::test::readFileToEigenMatrix<float, 1, Eigen::Dynamic>(
               suboptimality_traj_source_file);
       for (size_t i = 0; i < suboptimality_traj_mat.cols(); ++i) {
         data.expected_outputs.certification_result.suboptimality_traj.push_back(
@@ -340,9 +340,9 @@ protected:
       auto t1 = clock.now();
       functor(kv.second);
       auto t2 = clock.now();
-      std::chrono::duration<double, std::milli> diff = t2 - t1;
+      std::chrono::duration<float, std::milli> diff = t2 - t1;
       std::cout << "\nN=" << kv.second.inputs.v1.cols() << " | Test took "
-                << static_cast<double>(diff.count()) / 1000.0 << "seconds." << std::endl;
+                << static_cast<float>(diff.count()) / 1000.0 << "seconds." << std::endl;
     }
     std::cout << div_str << std::endl;
   }
@@ -360,7 +360,7 @@ TEST_F(DRSCertifierTest, GetOmega1) {
     teaser::DRSCertifier certifier(case_data.inputs.params);
 
     // perform the computation
-    Eigen::Matrix4d actual_output = certifier.getOmega1(case_data.inputs.q_est);
+    Eigen::Matrix4f actual_output = certifier.getOmega1(case_data.inputs.q_est);
     ASSERT_TRUE(actual_output.isApprox(expected_output))
         << "Actual output: " << actual_output << "Expected output: " << expected_output;
   };
@@ -377,7 +377,7 @@ TEST_F(DRSCertifierTest, GetBlockDiagOmega) {
     teaser::DRSCertifier certifier(case_data.inputs.params);
 
     // perform the computation
-    Eigen::MatrixXd actual_output;
+    Eigen::MatrixXf actual_output;
     int Npm = (case_data.inputs.v1.cols() + 1) * 4;
     certifier.getBlockDiagOmega(Npm, case_data.inputs.q_est, &actual_output);
     ASSERT_TRUE(actual_output.isApprox(expected_output))
@@ -395,7 +395,7 @@ TEST_F(DRSCertifierTest, GetQCost) {
     teaser::DRSCertifier certifier(case_data.inputs.params);
 
     // perform the computation
-    Eigen::MatrixXd actual_output;
+    Eigen::MatrixXf actual_output;
     certifier.getQCost(case_data.inputs.v1, case_data.inputs.v2, &actual_output);
     ASSERT_TRUE(actual_output.isApprox(expected_output))
         << "Actual output: " << actual_output << "Expected output: " << expected_output;
@@ -429,7 +429,7 @@ TEST_F(DRSCertifierTest, GetLinearProjection) {
     // construct the certifier
     teaser::DRSCertifier certifier(case_data.inputs.params);
 
-    Eigen::Matrix<double, 1, Eigen::Dynamic> theta_prepended(1,
+    Eigen::Matrix<float, 1, Eigen::Dynamic> theta_prepended(1,
                                                              case_data.inputs.theta_est.cols() + 1);
     theta_prepended << 1, case_data.inputs.theta_est;
     ASSERT_TRUE(theta_prepended.rows() == 1);
@@ -449,7 +449,7 @@ TEST_F(DRSCertifierTest, GetOptimalDualProjection) {
   auto test_run = [](CaseData case_data) {
     // prepare parameters
     // theta prepended
-    Eigen::Matrix<double, 1, Eigen::Dynamic> theta_prepended(1,
+    Eigen::Matrix<float, 1, Eigen::Dynamic> theta_prepended(1,
                                                              case_data.inputs.theta_est.cols() + 1);
     theta_prepended << 1, case_data.inputs.theta_est;
     ASSERT_TRUE(theta_prepended.rows() == 1);
@@ -461,7 +461,7 @@ TEST_F(DRSCertifierTest, GetOptimalDualProjection) {
     // construct the certifier
     teaser::DRSCertifier certifier(case_data.inputs.params);
 
-    Eigen::MatrixXd actual_output;
+    Eigen::MatrixXf actual_output;
     certifier.getOptimalDualProjection(case_data.inputs.W, theta_prepended, A_inv_sparse,
                                        &actual_output);
 
@@ -486,7 +486,7 @@ TEST_F(DRSCertifierTest, ComputeSubOptimalityGap) {
     // construct the certifier
     teaser::DRSCertifier certifier(case_data.inputs.params);
 
-    double actual_output = certifier.computeSubOptimalityGap(
+    float actual_output = certifier.computeSubOptimalityGap(
         case_data.inputs.M_affine, case_data.inputs.mu, case_data.inputs.v1.cols());
     const auto& expected_output = case_data.expected_outputs.suboptimality_1st_iter;
 
@@ -541,23 +541,23 @@ TEST_F(DRSCertifierTest, Random100Points) {
     data.inputs.params.noise_bound = 0.01;
 
     // generate random vectors and transformations
-    data.inputs.v1 = Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N);
-    data.inputs.q_est = Eigen::Quaternion<double>::UnitRandom();
+    data.inputs.v1 = Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N);
+    data.inputs.q_est = Eigen::Quaternion<float>::UnitRandom();
     data.inputs.R_est = data.inputs.q_est.toRotationMatrix();
-    data.inputs.theta_est = Eigen::Matrix<double, 1, Eigen::Dynamic>::Ones(1, N);
+    data.inputs.theta_est = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(1, N);
 
     // calculate vectors after transformation
     // noise bounded by 0.01
-    Eigen::Matrix<double, 3, Eigen::Dynamic> noise =
-        (Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N).array() + 1) / 200.0;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> noise =
+        (Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N).array() + 1) / 200.0;
     data.inputs.v2 = data.inputs.R_est * data.inputs.v1;
 
     // outliers
-    double outlier_ratio = 0.1;
+    float outlier_ratio = 0.1;
     int outlier_start_idx = (int)(N * (1 - outlier_ratio));
     for (size_t i = outlier_start_idx; i < N; ++i) {
-      data.inputs.v2.col(i) = Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, 1) * 5 +
-                              Eigen::Matrix<double, 3, Eigen::Dynamic>::Ones(3, 1) * 5;
+      data.inputs.v2.col(i) = Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, 1) * 5 +
+                              Eigen::Matrix<float, 3, Eigen::Dynamic>::Ones(3, 1) * 5;
       data.inputs.theta_est(0, i) = -1;
     }
 
@@ -586,7 +586,7 @@ TEST_F(DRSCertifierTest, Random100Points) {
 TEST_F(DRSCertifierTest, RandomLargeInstsances) {
   // generate 3 random large problem instances
   std::map<std::string, CaseData> random_instances_params;
-  std::array<double, 3> problem_sizes = {200, 300, 400};
+  std::array<float, 3> problem_sizes = {200, 300, 400};
 
   for (size_t i = 0; i < problem_sizes.size(); ++i) {
 
@@ -601,23 +601,23 @@ TEST_F(DRSCertifierTest, RandomLargeInstsances) {
     data.inputs.params.noise_bound = 0.01;
 
     // generate random vectors and transformations
-    data.inputs.v1 = Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N);
-    data.inputs.q_est = Eigen::Quaternion<double>::UnitRandom();
+    data.inputs.v1 = Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N);
+    data.inputs.q_est = Eigen::Quaternion<float>::UnitRandom();
     data.inputs.R_est = data.inputs.q_est.toRotationMatrix();
-    data.inputs.theta_est = Eigen::Matrix<double, 1, Eigen::Dynamic>::Ones(1, N);
+    data.inputs.theta_est = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(1, N);
 
     // calculate vectors after transformation
     // noise bounded by 0.01
-    Eigen::Matrix<double, 3, Eigen::Dynamic> noise =
-        (Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N).array() + 1) / 200.0;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> noise =
+        (Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N).array() + 1) / 200.0;
     data.inputs.v2 = data.inputs.R_est * data.inputs.v1;
 
     // outliers
-    double outlier_ratio = 0.1;
+    float outlier_ratio = 0.1;
     int outlier_start_idx = (int)(N * (1 - outlier_ratio));
     for (size_t i = outlier_start_idx; i < N; ++i) {
-      data.inputs.v2.col(i) = Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, 1) * 5 +
-                              Eigen::Matrix<double, 3, Eigen::Dynamic>::Ones(3, 1) * 5;
+      data.inputs.v2.col(i) = Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, 1) * 5 +
+                              Eigen::Matrix<float, 3, Eigen::Dynamic>::Ones(3, 1) * 5;
       data.inputs.theta_est(0, i) = -1;
     }
 

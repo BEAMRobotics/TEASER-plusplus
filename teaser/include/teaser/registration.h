@@ -20,7 +20,7 @@
 #include "teaser/geometry.h"
 
 // TODO: might be a good idea to template Eigen::Vector3f and Eigen::VectorXf such that later on we
-// can decide to use doulbe if we want. Double vs float might give nontrivial differences..
+// can decide to use doulbe if we want. float vs float might give nontrivial differences..
 
 namespace teaser {
 
@@ -29,9 +29,9 @@ namespace teaser {
  */
 struct RegistrationSolution {
   bool valid = true;
-  double scale;
-  Eigen::Vector3d translation;
-  Eigen::Matrix3d rotation;
+  float scale;
+  Eigen::Vector3f translation;
+  Eigen::Matrix3f rotation;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
@@ -50,8 +50,8 @@ public:
    * @param dst
    * @return estimated scale (s)
    */
-  virtual void solveForScale(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                             const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst, double* scale,
+  virtual void solveForScale(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                             const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst, float* scale,
                              Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) = 0;
 };
 
@@ -70,9 +70,9 @@ public:
    * @param dst
    * @return estimated rotation matrix (R)
    */
-  virtual void solveForRotation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                                const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
-                                Eigen::Matrix3d* rotation,
+  virtual void solveForRotation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                                const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
+                                Eigen::Matrix3f* rotation,
                                 Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) = 0;
 };
 
@@ -91,9 +91,9 @@ public:
    * @param dst
    * @return estimated translation vector
    */
-  virtual void solveForTranslation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
-                                   Eigen::Vector3d* translation,
+  virtual void solveForTranslation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                                   const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
+                                   Eigen::Vector3f* translation,
                                    Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) = 0;
 };
 
@@ -109,10 +109,10 @@ public:
    * TODO: specify which type/size is x and X in the comments
    * @param X Available measurements
    * @param ranges Maximum admissible errors for measurements X
-   * @param estimate (output) pointer to a double holding the estimate
+   * @param estimate (output) pointer to a float holding the estimate
    * @param inliers (output) pointer to a Eigen row vector of inliers
    */
-  void estimate(const Eigen::RowVectorXd& X, const Eigen::RowVectorXd& ranges, double* estimate,
+  void estimate(const Eigen::RowVectorXf& X, const Eigen::RowVectorXf& ranges, float* estimate,
                 Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers);
 
   /**
@@ -121,11 +121,11 @@ public:
    * @param X Available measurements
    * @param ranges Maximum admissible errors for measurements X
    * @param s scale for tiling
-   * @param estimate (output) pointer to a double holding the estimate
+   * @param estimate (output) pointer to a float holding the estimate
    * @param inliers (output) pointer to a Eigen row vector of inliers
    */
-  void estimate_tiled(const Eigen::RowVectorXd& X, const Eigen::RowVectorXd& ranges, const int& s,
-                      double* estimate, Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers);
+  void estimate_tiled(const Eigen::RowVectorXf& X, const Eigen::RowVectorXf& ranges, const int& s,
+                      float* estimate, Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers);
 };
 
 /**
@@ -135,7 +135,7 @@ class TLSScaleSolver : public AbstractScaleSolver {
 public:
   TLSScaleSolver() = delete;
 
-  explicit TLSScaleSolver(double noise_bound, double cbar2)
+  explicit TLSScaleSolver(float noise_bound, float cbar2)
       : noise_bound_(noise_bound), cbar2_(cbar2) {
     assert(noise_bound > 0);
     assert(cbar2 > 0);
@@ -145,15 +145,15 @@ public:
    * Use TLS (adaptive voting) to solve for scale. Assume dst = s * R * src
    * @param src
    * @param dst
-   * @return a double indicating the estimated scale
+   * @return a float indicating the estimated scale
    */
-  void solveForScale(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                     const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst, double* scale,
+  void solveForScale(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                     const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst, float* scale,
                      Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) override;
 
 private:
-  double noise_bound_;
-  double cbar2_; // maximal allowed residual^2 to noise bound^2 ratio
+  float noise_bound_;
+  float cbar2_; // maximal allowed residual^2 to noise bound^2 ratio
   ScalarTLSEstimator tls_estimator_;
 };
 
@@ -166,7 +166,7 @@ class ScaleInliersSelector : public AbstractScaleSolver {
 public:
   ScaleInliersSelector() = delete;
 
-  explicit ScaleInliersSelector(double noise_bound, double cbar2)
+  explicit ScaleInliersSelector(float noise_bound, float cbar2)
       : noise_bound_(noise_bound), cbar2_(cbar2){};
   /**
    * Assume dst = src + noise. The scale output will always be set to 1.
@@ -175,13 +175,13 @@ public:
    * @param scale [out] a constant of 1
    * @param inliers [out] a row vector of booleans indicating whether a measurement is an inlier
    */
-  void solveForScale(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                     const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst, double* scale,
+  void solveForScale(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                     const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst, float* scale,
                      Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) override;
 
 private:
-  double noise_bound_;
-  double cbar2_; // maximal allowed residual^2 to noise bound^2 ratio
+  float noise_bound_;
+  float cbar2_; // maximal allowed residual^2 to noise bound^2 ratio
 };
 
 /**
@@ -191,7 +191,7 @@ class TLSTranslationSolver : public AbstractTranslationSolver {
 public:
   TLSTranslationSolver() = delete;
 
-  explicit TLSTranslationSolver(double noise_bound, double cbar2)
+  explicit TLSTranslationSolver(float noise_bound, float cbar2)
       : noise_bound_(noise_bound), cbar2_(cbar2){};
 
   /**
@@ -201,14 +201,14 @@ public:
    * @param translation output parameter for the translation vector
    * @param inliers output parameter for detected outliers
    */
-  void solveForTranslation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                           const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
-                           Eigen::Vector3d* translation,
+  void solveForTranslation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                           const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
+                           Eigen::Vector3f* translation,
                            Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) override;
 
 private:
-  double noise_bound_;
-  double cbar2_; // maximal allowed residual^2 to noise bound^2 ratio
+  float noise_bound_;
+  float cbar2_; // maximal allowed residual^2 to noise bound^2 ratio
   ScalarTLSEstimator tls_estimator_;
 };
 
@@ -220,9 +220,9 @@ class GNCRotationSolver : public AbstractRotationSolver {
 public:
   struct Params {
     size_t max_iterations;
-    double cost_threshold;
-    double gnc_factor;
-    double noise_bound;
+    float cost_threshold;
+    float gnc_factor;
+    float noise_bound;
   };
 
   GNCRotationSolver(Params params) : params_(params) {}
@@ -237,11 +237,11 @@ public:
    *
    * @return cost at termination of the GNC solver. Undefined if run before running the solver.
    */
-  double getCostAtTermination() { return cost_; }
+  float getCostAtTermination() { return cost_; }
 
 protected:
   Params params_;
-  double cost_;
+  float cost_;
 };
 
 /**
@@ -269,9 +269,9 @@ public:
    * @param rotation
    * @param inliers
    */
-  void solveForRotation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
-                        Eigen::Matrix3d* rotation,
+  void solveForRotation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                        const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
+                        Eigen::Matrix3f* rotation,
                         Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) override;
 };
 
@@ -306,9 +306,9 @@ public:
    * @param dst
    * @return a RegistrationSolution struct.
    */
-  void solveForRotation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                        const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst,
-                        Eigen::Matrix3d* rotation,
+  void solveForRotation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                        const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst,
+                        Eigen::Matrix3f* rotation,
                         Eigen::Matrix<bool, 1, Eigen::Dynamic>* inliers) override;
 };
 
@@ -376,12 +376,12 @@ public:
     /**
      * A bound on the noise of each provided measurement.
      */
-    double noise_bound = 0.01;
+    float noise_bound = 0.01;
 
     /**
      * Square of the ratio between acceptable noise and noise bound. Usually set to 1.
      */
-    double cbar2 = 1;
+    float cbar2 = 1;
 
     /**
      * Whether the scale is known. If set to False, the solver assumes no scale differences
@@ -403,7 +403,7 @@ public:
      * For FGR: the algorithm divides the control parameter by the factor every iteration.
      * For GNC-TLS: the algorithm multiples the control parameter by the factor every iteration.
      */
-    double rotation_gnc_factor = 1.4;
+    float rotation_gnc_factor = 1.4;
 
     /**
      * Maximum iterations allowed for the GNC rotation estimators.
@@ -418,7 +418,7 @@ public:
      * For GNC-TLS: the cost threshold compares with the difference between costs of consecutive
      * iterations.
      */
-    double rotation_cost_threshold = 1e-6;
+    float rotation_cost_threshold = 1e-6;
 
     /**
      * Type of TIM graph given to GNC rotation solver
@@ -443,7 +443,7 @@ public:
      * graph will be directly fed to the GNC rotation solver.
      *
      */
-    double kcore_heuristic_threshold = 0.5;
+    float kcore_heuristic_threshold = 0.5;
 
     /**
      * \deprecated Use inlier_selection_mode instead
@@ -460,7 +460,7 @@ public:
     /**
      * Time limit on running the max clique algorithm (in seconds).
      */
-    double max_clique_time_limit = 3600;
+    float max_clique_time_limit = 3600;
   };
 
   RobustRegistrationSolver() = default;
@@ -479,8 +479,8 @@ public:
    * @param v a 3-by-N matrix
    * @return a 3-by-(N-1)*N matrix representing TIMs
    */
-  Eigen::Matrix<double, 3, Eigen::Dynamic>
-  computeTIMs(const Eigen::Matrix<double, 3, Eigen::Dynamic>& v,
+  Eigen::Matrix<float, 3, Eigen::Dynamic>
+  computeTIMs(const Eigen::Matrix<float, 3, Eigen::Dynamic>& v,
               Eigen::Matrix<int, 2, Eigen::Dynamic>* map);
 
   /**
@@ -500,32 +500,32 @@ public:
    * @param v1
    * @param v2
    */
-  RegistrationSolution solve(const Eigen::Matrix<double, 3, Eigen::Dynamic>& src,
-                             const Eigen::Matrix<double, 3, Eigen::Dynamic>& dst);
+  RegistrationSolution solve(const Eigen::Matrix<float, 3, Eigen::Dynamic>& src,
+                             const Eigen::Matrix<float, 3, Eigen::Dynamic>& dst);
 
   /**
    * Solve for scale. Assume v2 = s * R * v1, this function estimates s.
    * @param v1
    * @param v2
    */
-  double solveForScale(const Eigen::Matrix<double, 3, Eigen::Dynamic>& v1,
-                       const Eigen::Matrix<double, 3, Eigen::Dynamic>& v2);
+  float solveForScale(const Eigen::Matrix<float, 3, Eigen::Dynamic>& v1,
+                       const Eigen::Matrix<float, 3, Eigen::Dynamic>& v2);
 
   /**
    * Solve for translation.
    * @param v1
    * @param v2
    */
-  Eigen::Vector3d solveForTranslation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& v1,
-                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& v2);
+  Eigen::Vector3f solveForTranslation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& v1,
+                                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& v2);
 
   /**
    * Solve for rotation. Assume v2 = R * v1, this function estimates find R.
    * @param v1
    * @param v2
    */
-  Eigen::Matrix3d solveForRotation(const Eigen::Matrix<double, 3, Eigen::Dynamic>& v1,
-                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& v2);
+  Eigen::Matrix3f solveForRotation(const Eigen::Matrix<float, 3, Eigen::Dynamic>& v1,
+                                   const Eigen::Matrix<float, 3, Eigen::Dynamic>& v2);
 
   /**
    * Return the cost at termination of the GNC rotation solver. Can be used to
@@ -533,7 +533,7 @@ public:
    *
    * @return cost at termination of the GNC solver. Undefined if run before running the solver.
    */
-  inline double getGNCRotationCostAtTermination() {
+  inline float getGNCRotationCostAtTermination() {
     return rotation_solver_->getCostAtTermination();
   }
 
@@ -683,25 +683,25 @@ public:
    * Get TIMs built from source point cloud.
    * @return
    */
-  inline Eigen::Matrix<double, 3, Eigen::Dynamic> getSrcTIMs() { return src_tims_; }
+  inline Eigen::Matrix<float, 3, Eigen::Dynamic> getSrcTIMs() { return src_tims_; }
 
   /**
    * Get TIMs built from target point cloud.
    * @return
    */
-  inline Eigen::Matrix<double, 3, Eigen::Dynamic> getDstTIMs() { return dst_tims_; }
+  inline Eigen::Matrix<float, 3, Eigen::Dynamic> getDstTIMs() { return dst_tims_; }
 
   /**
    * Get src TIMs built after max clique pruning.
    * @return
    */
-  inline Eigen::Matrix<double, 3, Eigen::Dynamic> getMaxCliqueSrcTIMs() { return pruned_src_tims_; }
+  inline Eigen::Matrix<float, 3, Eigen::Dynamic> getMaxCliqueSrcTIMs() { return pruned_src_tims_; }
 
   /**
    * Get dst TIMs built after max clique pruning.
    * @return
    */
-  inline Eigen::Matrix<double, 3, Eigen::Dynamic> getMaxCliqueDstTIMs() { return pruned_dst_tims_; }
+  inline Eigen::Matrix<float, 3, Eigen::Dynamic> getMaxCliqueDstTIMs() { return pruned_dst_tims_; }
 
   /**
    * Get the index map of the TIMs built from source point cloud.
@@ -790,11 +790,11 @@ private:
 
   // TIMs
   // TIMs used for scale estimation/pruning
-  Eigen::Matrix<double, 3, Eigen::Dynamic> src_tims_;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> dst_tims_;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> src_tims_;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> dst_tims_;
   // TIMs used for rotation estimation
-  Eigen::Matrix<double, 3, Eigen::Dynamic> pruned_src_tims_;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> pruned_dst_tims_;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> pruned_src_tims_;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> pruned_dst_tims_;
 
   // TIM maps
   // for scale estimation

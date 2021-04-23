@@ -248,12 +248,12 @@ public:
      * GNC rotation estimation. Set this to 1 to always use exact max clique selection, 0 to always
      * skip exact max clique selection.
      */
-    double kcore_heuristic_threshold = 1;
+    float kcore_heuristic_threshold = 1;
 
     /**
      * Time limit on running the solver.
      */
-    double time_limit = 3600;
+    float time_limit = 3600;
   };
 
   MaxCliqueSolver() = default;

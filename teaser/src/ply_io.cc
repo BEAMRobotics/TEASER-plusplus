@@ -16,11 +16,11 @@
 #include "tinyply.h"
 
 // Internal datatypes for storing ply vertices
-struct float3 {
-  float x, y, z;
-};
 struct double3 {
   double x, y, z;
+};
+struct float3 {
+  float x, y, z;
 };
 
 int teaser::PLYReader::read(const std::string& file_name, teaser::PointCloud& cloud) {
@@ -60,10 +60,10 @@ int teaser::PLYReader::read(const std::string& file_name, teaser::PointCloud& cl
         }
       }
       if (vertices->t == tinyply::Type::FLOAT64) {
-        std::vector<double3> verts_doubles(vertices->count);
+        std::vector<float3> verts_floats(vertices->count);
         const size_t numVerticesBytes = vertices->buffer.size_bytes();
-        std::memcpy(verts_doubles.data(), vertices->buffer.get(), numVerticesBytes);
-        for (auto& i : verts_doubles) {
+        std::memcpy(verts_floats.data(), vertices->buffer.get(), numVerticesBytes);
+        for (auto& i : verts_floats) {
           cloud.push_back(
               {static_cast<float>(i.x), static_cast<float>(i.y), static_cast<float>(i.z)});
         }

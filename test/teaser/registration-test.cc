@@ -27,12 +27,12 @@ TEST(RegistrationTest, LargeModel) {
   teaser::PointCloud src_cloud;
   auto status = reader.read(model_file, src_cloud);
   EXPECT_EQ(status, 0);
-  auto eigen_src = teaser::test::teaserPointCloudToEigenMatrix<double>(src_cloud);
+  auto eigen_src = teaser::test::teaserPointCloudToEigenMatrix<float>(src_cloud);
 
   teaser::PointCloud dst_cloud;
   status = reader.read(scene_file, dst_cloud);
   EXPECT_EQ(status, 0);
-  auto eigen_dst = teaser::test::teaserPointCloudToEigenMatrix<double>(dst_cloud);
+  auto eigen_dst = teaser::test::teaserPointCloudToEigenMatrix<float>(dst_cloud);
 
   // Start the timer
   auto start = std::chrono::high_resolution_clock::now();
@@ -67,13 +67,13 @@ TEST(RegistrationTest, SolveForScale) {
     // read in input data
     std::ifstream objectFile("./data/registration_test/objectIn.csv");
     std::ifstream sceneFile("./data/registration_test/sceneIn.csv");
-    double noise_bound = 0.0067364;
+    float noise_bound = 0.0067364;
 
     // reference solution for scale
-    double scale_est_ref = 0.955885;
+    float scale_est_ref = 0.955885;
 
-    auto object_points = teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(objectFile);
-    auto scene_points = teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(sceneFile);
+    auto object_points = teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(objectFile);
+    auto scene_points = teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(sceneFile);
     EXPECT_EQ(object_points.cols(), scene_points.cols());
 
     // Solve for scale
@@ -115,18 +115,18 @@ TEST(RegistrationTest, SolveForRotation) {
 
     // Read in data
     std::ifstream source_file("./data/registration_test/rotation_only_src.csv");
-    Eigen::Matrix<double, Eigen::Dynamic, 3> source_points =
-        teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, 3>(source_file);
-    Eigen::Matrix<double, 3, Eigen::Dynamic> src = source_points.transpose();
+    Eigen::Matrix<float, Eigen::Dynamic, 3> source_points =
+        teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, 3>(source_file);
+    Eigen::Matrix<float, 3, Eigen::Dynamic> src = source_points.transpose();
 
     // Generate rotated points
-    Eigen::Matrix3d expected_R;
+    Eigen::Matrix3f expected_R;
     // clang-format off
     expected_R << 0.997379773225804, -0.019905935977315, -0.069551000516966,
                   0.013777311189888, 0.996068297974922, -0.087510750572249,
                   0.071019530105605, 0.086323226782879, 0.993732623426126;
     // clang-format on
-    Eigen::Matrix<double, 3, Eigen::Dynamic> dst = expected_R * src;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> dst = expected_R * src;
 
     // Solve & check for answer
     solver.solveForRotation(src, dst);
@@ -150,18 +150,18 @@ TEST(RegistrationTest, SolveForRotation) {
 
     // Read in data
     std::ifstream source_file("./data/registration_test/rotation_only_src.csv");
-    Eigen::Matrix<double, Eigen::Dynamic, 3> source_points =
-        teaser::test::readFileToEigenMatrix<double, Eigen::Dynamic, 3>(source_file);
-    Eigen::Matrix<double, 3, Eigen::Dynamic> src = source_points.transpose();
+    Eigen::Matrix<float, Eigen::Dynamic, 3> source_points =
+        teaser::test::readFileToEigenMatrix<float, Eigen::Dynamic, 3>(source_file);
+    Eigen::Matrix<float, 3, Eigen::Dynamic> src = source_points.transpose();
 
     // Generate rotated points
-    Eigen::Matrix3d expected_R;
+    Eigen::Matrix3f expected_R;
     // clang-format off
     expected_R << 0.997379773225804, -0.019905935977315, -0.069551000516966,
                   0.013777311189888, 0.996068297974922, -0.087510750572249,
                   0.071019530105605, 0.086323226782879, 0.993732623426126;
     // clang-format on
-    Eigen::Matrix<double, 3, Eigen::Dynamic> dst = expected_R * src;
+    Eigen::Matrix<float, 3, Eigen::Dynamic> dst = expected_R * src;
 
     // Solve & check answer
     solver.solveForRotation(src, dst);
@@ -178,8 +178,8 @@ TEST(RegistrationTest, SolveRegistrationProblemDecoupled) {
     // Read in testing data from csv files
     std::ifstream objectFile("./data/registration_test/objectIn.csv");
     std::ifstream sceneFile("./data/registration_test/sceneIn.csv");
-    auto object_points = teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(objectFile);
-    auto scene_points = teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(sceneFile);
+    auto object_points = teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(objectFile);
+    auto scene_points = teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(sceneFile);
     EXPECT_TRUE(object_points.cols() != 0);
     EXPECT_EQ(object_points.cols(), scene_points.cols());
 
@@ -209,11 +209,11 @@ TEST(RegistrationTest, SolveRegistrationProblemDecoupled) {
     auto actual_solution = solver.getSolution();
 
     // reference solution for scale
-    double expected_solution = 0.955885; // scale from Matlab example
-    Eigen::Matrix3d expected_rotation_solution;
+    float expected_solution = 0.955885; // scale from Matlab example
+    Eigen::Matrix3f expected_rotation_solution;
     expected_rotation_solution << 0.9974, -0.0199, -0.0696, 0.0138, 0.9961, -0.0875, 0.0710, 0.0863,
         0.9937;
-    Eigen::Vector3d expected_translation_solution;
+    Eigen::Vector3f expected_translation_solution;
     expected_translation_solution << -0.1011, 0.0908, 0.1344;
 
     std::cout << "Rotation estimation error: "
@@ -232,8 +232,8 @@ TEST(RegistrationTest, SolveRegistrationProblemDecoupled) {
     // Read in testing data from csv files
     std::ifstream objectFile("./data/registration_test/objectIn.csv");
     std::ifstream sceneFile("./data/registration_test/sceneIn.csv");
-    auto object_points = teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(objectFile);
-    auto scene_points = teaser::test::readFileToEigenMatrix<double, 3, Eigen::Dynamic>(sceneFile);
+    auto object_points = teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(objectFile);
+    auto scene_points = teaser::test::readFileToEigenMatrix<float, 3, Eigen::Dynamic>(sceneFile);
     EXPECT_TRUE(object_points.cols() != 0);
     EXPECT_EQ(object_points.cols(), scene_points.cols());
 
@@ -260,14 +260,14 @@ TEST(RegistrationTest, SolveRegistrationProblemDecoupled) {
               << " microseconds." << std::endl;
 
     // reference solution for scale
-    double expected_solution = 1; // scale from Matlab example
-    Eigen::Matrix3d expected_rotation_solution;
+    float expected_solution = 1; // scale from Matlab example
+    Eigen::Matrix3f expected_rotation_solution;
     // clang-format off
     expected_rotation_solution << 0.9974, -0.0199, -0.0696,
                                   0.0138, 0.9961, -0.0875,
                                   0.0710, 0.0863, 0.9937;
     // clang-format on
-    Eigen::Vector3d expected_translation_solution;
+    Eigen::Vector3f expected_translation_solution;
     expected_translation_solution << -0.1011, 0.0908, 0.1344;
     std::ifstream expected_inliers_file("./data/registration_test/fixed_scale_inliers.csv");
     auto expected_scale_inliers =
@@ -312,15 +312,15 @@ TEST(RegistrationTest, OutlierDetection) {
 
   // Random point cloud
   int N = 20;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> src =
-      Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N);
-  Eigen::Matrix<double, 4, Eigen::Dynamic> src_h;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> src =
+      Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N);
+  Eigen::Matrix<float, 4, Eigen::Dynamic> src_h;
   src_h.resize(4, src.cols());
   src_h.topRows(3) = src;
-  src_h.bottomRows(1) = Eigen::Matrix<double, 1, Eigen::Dynamic>::Ones(N);
+  src_h.bottomRows(1) = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(N);
 
   // An arbitrary transformation matrix
-  Eigen::Matrix4d T;
+  Eigen::Matrix4f T;
   // clang-format off
   T << 9.96926560e-01,  6.68735757e-02, -4.06664421e-02, -1.15576939e-01,
        -6.61289946e-02, 9.97617877e-01,  1.94008687e-02, -3.87705398e-02,
@@ -329,8 +329,8 @@ TEST(RegistrationTest, OutlierDetection) {
   // clang-format on
 
   // Apply transformation
-  Eigen::Matrix<double, 4, Eigen::Dynamic> tgt_h = T * src_h;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> tgt = tgt_h.topRows(3);
+  Eigen::Matrix<float, 4, Eigen::Dynamic> tgt_h = T * src_h;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> tgt = tgt_h.topRows(3);
 
   // Pick some points to be outliers
   std::random_device rd;
@@ -386,15 +386,15 @@ TEST(RegistrationTest, OutlierDetection) {
 TEST(RegistrationTest, NoMaxClique) {
   // Random point cloud
   int N = 20;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> src =
-      Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N);
-  Eigen::Matrix<double, 4, Eigen::Dynamic> src_h;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> src =
+      Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N);
+  Eigen::Matrix<float, 4, Eigen::Dynamic> src_h;
   src_h.resize(4, src.cols());
   src_h.topRows(3) = src;
-  src_h.bottomRows(1) = Eigen::Matrix<double, 1, Eigen::Dynamic>::Ones(N);
+  src_h.bottomRows(1) = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(N);
 
   // An arbitrary transformation matrix
-  Eigen::Matrix4d T;
+  Eigen::Matrix4f T;
   // clang-format off
   T << 9.96926560e-01,  6.68735757e-02, -4.06664421e-02, -1.15576939e-01,
       -6.61289946e-02, 9.97617877e-01,  1.94008687e-02, -3.87705398e-02,
@@ -403,8 +403,8 @@ TEST(RegistrationTest, NoMaxClique) {
   // clang-format on
 
   // Apply transformation
-  Eigen::Matrix<double, 4, Eigen::Dynamic> tgt_h = T * src_h;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> tgt = tgt_h.topRows(3);
+  Eigen::Matrix<float, 4, Eigen::Dynamic> tgt_h = T * src_h;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> tgt = tgt_h.topRows(3);
 
   // Pick some points to be outliers
   std::random_device rd;
@@ -452,15 +452,15 @@ TEST(RegistrationTest, NoMaxClique) {
 TEST(RegistrationTest, CliqueFinderModes) {
   // Random point cloud
   int N = 20;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> src =
-      Eigen::Matrix<double, 3, Eigen::Dynamic>::Random(3, N);
-  Eigen::Matrix<double, 4, Eigen::Dynamic> src_h;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> src =
+      Eigen::Matrix<float, 3, Eigen::Dynamic>::Random(3, N);
+  Eigen::Matrix<float, 4, Eigen::Dynamic> src_h;
   src_h.resize(4, src.cols());
   src_h.topRows(3) = src;
-  src_h.bottomRows(1) = Eigen::Matrix<double, 1, Eigen::Dynamic>::Ones(N);
+  src_h.bottomRows(1) = Eigen::Matrix<float, 1, Eigen::Dynamic>::Ones(N);
 
   // An arbitrary transformation matrix
-  Eigen::Matrix4d T;
+  Eigen::Matrix4f T;
   // clang-format off
   T << 9.96926560e-01,  6.68735757e-02, -4.06664421e-02, -1.15576939e-01,
       -6.61289946e-02, 9.97617877e-01,  1.94008687e-02, -3.87705398e-02,
@@ -469,8 +469,8 @@ TEST(RegistrationTest, CliqueFinderModes) {
   // clang-format on
 
   // Apply transformation
-  Eigen::Matrix<double, 4, Eigen::Dynamic> tgt_h = T * src_h;
-  Eigen::Matrix<double, 3, Eigen::Dynamic> tgt = tgt_h.topRows(3);
+  Eigen::Matrix<float, 4, Eigen::Dynamic> tgt_h = T * src_h;
+  Eigen::Matrix<float, 3, Eigen::Dynamic> tgt = tgt_h.topRows(3);
 
   // Pick some points to be outliers
   std::random_device rd;

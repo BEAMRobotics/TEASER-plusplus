@@ -1,6 +1,8 @@
 project(teaser_source)
 include(GNUInstallDirs)
 
+find_package(PCL 1.11.1 REQUIRED COMPONENTS common features kdtree)
+
 # teaser_io library
 add_library(teaser_io SHARED src/ply_io.cc)
 target_link_libraries(teaser_io PRIVATE tinyply)
@@ -47,6 +49,7 @@ list(APPEND TEASERPP_EXPORTED_TARGETS teaser_registration pmc)
 add_library(teaserpp::teaser_registration ALIAS teaser_registration)
 
 # teaser_features library
+set(BUILD_TEASER_FPFH true)
 if (BUILD_TEASER_FPFH)
     add_library(teaser_features SHARED
             src/fpfh.cc

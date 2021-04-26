@@ -14,7 +14,7 @@ endif ()
 
 # Options
 option(BUILD_TESTS "Build tests" ON)
-option(BUILD_TEASER_FPFH "Build TEASER++ wrappers for PCL FPFH estimation." OFF)
+option(BUILD_TEASER_FPFH "Build TEASER++ wrappers for PCL FPFH estimation." ON)
 option(BUILD_MATLAB_BINDINGS "Build MATLAB bindings" OFF)
 option(BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
 option(BUILD_DOC "Build documentation" ON)
@@ -52,7 +52,7 @@ if (BUILD_TEASER_FPFH)
     find_package(Boost 1.58 QUIET REQUIRED)
 
     # PCL
-    find_package(PCL 1.8 QUIET REQUIRED COMPONENTS common io features kdtree)
+    find_package(PCL 1.11.1 QUIET REQUIRED COMPONENTS common io features kdtree)
 endif ()
 
 # googletest
